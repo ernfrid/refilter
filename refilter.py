@@ -19,14 +19,38 @@ import numpy as np
         help='Filters that cannot be rescued')
 @click.option('--exclude-fields', default=['OLD_MULTIALLELIC'], multiple=True, type=click.STRING,
         help='INFO fields that preclude a line from being rescued')
+@click.argument('vcf', type=click.Path())
 def main(min_allele_balance,
         max_allele_balance,
         allele_balance_tag,
         min_depth,
         min_vqslod,
         exclude_filters,
-        exclude_fields):
-    print  ','.join(exclude_filters)
+        exclude_fields,
+        vcf):
+    reader = VCF(vcf)
+    writer = Writer('-', reader)
+
+    for variant in reader:
+        filter_field = variant.FILTER
+        if filter_field is None:
+            continue
+        filters = set(variant.FILTER.split(';'))
+        for field in exclude_fields:
+            if field in variant.INFO:
+                writer.write_record(variant)
+                continue
+        for filt_string in exclude_filters:
+            if filt_string in filters:
+                writer.write_record(variant)
+                continue # FIXME THIS IS A BUG
+        ab = variant.INFO[allele_balance_tag]
+        if (ab >= min_allele_balance and
+                ab <= max_allele_balance and
+                variant.INFO['DP'] >= min_depth and
+                variant.INFO['VQSLOD'] >= min_vqslod):
+            variant.FILTER = 'PASS'
+            writer.write_record(variant)
 
 if __name__ == '__main__':
     main()
