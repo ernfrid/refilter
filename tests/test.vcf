@@ -16,7 +16,7 @@
 ##INFO=<ID=AB,Number=1,Type=Float,Description="Per site allele balance">
 ##INFO=<ID=AB_HOM,Number=1,Type=Float,Description="Per site allele balance, hom alts included">
 ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
-##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=VAR_DP,Number=1,Type=Integer,Description="Total Depth for Samples genotyped variant">
 ##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
 ##INFO=<ID=AA,Number=1,Type=String,Description="Ancestral Allele">
 ##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, build 129">
@@ -52,8 +52,8 @@
 ##INFO=<ID=OLD_VARIANT,Number=.,Type=String,Description="Original chr:pos:ref:alt encoding">
 ##FILTER=<ID=MISSING,Description="failed variant site missingness threshold (2.0 %)">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
-20	10000	.	G	A	29	PASS	AB=0.1;VQSLOD=1;NS=3;DP=14;AF=0.5;DB;H2	GT	0|0	1|0	1/1
-20	20000	.	T	A	3	.	AB=0.8;VQSLOD=2;NS=3;DP=11;AF=0.017	GT	0|0	0|1	0/0
-20	30000	.	A	G	67	VQSRTrancheSNP99.00to99.90;MISSING	AB=0.5;VQSLOD=2;NS=2;DP=2;AF=0.333,0.667;AA=T;DB	GT	1|0	0|1	0/1
-20	40000	.	T	G	47	VQSRTrancheSNP99.00to99.90	AB=0.6;VQSLOD=-10;NS=3;DP=13;AA=T	GT	0|0	0|0	0/0
-20	50000	.	GTC	G	50	VQSRTrancheSNP99.00to99.90	AB=0.4;VQSLOD=2;NS=3;DP=9;AA=G	GT	0/1	0/0	1/1
+20	10000	.	G	A	29	PASS	AB=0.1;VQSLOD=1;NS=3;VAR_DP=14;AF=0.5;DB;H2	GT	0|0	1|0	1/1
+20	20000	.	T	A	3	.	AB=0.8;VQSLOD=2;NS=3;VAR_DP=11;AF=0.017	GT	0|0	0|1	0/0
+20	30000	.	A	G	67	VQSRTrancheSNP99.00to99.90;MISSING	AB=0.5;VQSLOD=2;NS=2;VAR_DP=2;AF=0.333,0.667;AA=T;DB	GT	1|0	0|1	0/1
+20	40000	.	T	G	47	VQSRTrancheSNP99.00to99.90	AB=0.6;VQSLOD=-10;NS=3;VAR_DP=13;AA=T	GT	0|0	0|0	0/0
+20	50000	.	GTC	G	50	VQSRTrancheSNP99.00to99.90	AB=0.4;VQSLOD=2;NS=3;VAR_DP=9;AA=G	GT	0/1	0/0	1/1
