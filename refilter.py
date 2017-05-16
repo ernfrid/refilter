@@ -68,7 +68,7 @@ class Filter(object):
                 variant.INFO['VQSLOD'] >= self.min_vqslod):
             if variant.FILTER is not None:
                 variant.INFO[self.rescue_tag] = variant.FILTER
-            self.pass_variant(variant)
+                self.pass_variant(variant)
         else:
             # FAILED
             self.fail_variant(variant)
