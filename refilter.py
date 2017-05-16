@@ -12,6 +12,31 @@ class Filter(object):
         self.min_vqslod = min_vqslod
         self.exclude_filters = exclude_filters
         self.exclude_fields = exclude_fields
+        self.filter_tag = 'AB_FILTERED{0}to{1}'.format(self.allele_bounds[0], self.allele_bounds[1])
+        self.rescue_tag = 'AB_RESCUED'
+
+    def rescued_header(self):
+        return {
+                'ID' : self.rescue_tag,
+                'Description' : 'Filter status before rescued based on allele balance',
+                'Type': 'String',
+                'Number' : '1'
+                }
+
+    def _filter_description(self):
+        desc = 'Failed allele balance filter. {1} <= {0} <= {2} and VQSLOD >= {3} and DP >= {4}.'.format(self.allele_balance_tag, self.allele_bounds[0], self.allele_bounds[1], self.min_vqslod, self.min_depth)
+        if self.exclude_filters is not None:
+            desc += ' Ignored sites with FILTER containing: {0}.'.format(','.join(self.exclude_filters))
+        if self.exclude_fields is not None:
+            desc += ' Ignored sites with any of the following tags in the INFO field: {0}.'.format(','.join(self.exclude_fields))
+        return desc
+
+
+    def filtered_header(self):
+        return {
+                'ID' : self.filter_tag,
+                'Description' : self._filter_description()
+                }
 
     def filters_ok(self, variant):
         if variant.FILTER is None:
@@ -36,15 +61,27 @@ class Filter(object):
 
     def rescue(self, variant):
         ab = variant.INFO[self.allele_balance_tag]
+        variant_filter = variant.FILTER
         if (ab >= self.allele_bounds[0] and
                 ab <= self.allele_bounds[1] and
                 variant.INFO['DP'] >= self.min_depth and
                 variant.INFO['VQSLOD'] >= self.min_vqslod):
+            if variant.FILTER is not None:
+                variant.INFO[self.rescue_tag] = variant.FILTER
             self.pass_variant(variant)
+        else:
+            # FAILED
+            self.fail_variant(variant)
 
     @staticmethod
     def pass_variant(variant):
         variant.FILTER = 'PASS'
+
+    def fail_variant(self, variant):
+        if variant.FILTER is not None:
+            variant.FILTER = variant.FILTER.split(';') + [self.filter_tag]
+        else:
+            variant.FILTER = self.filter_tag
 
 @click.command()
 @click.option('--min-allele-balance', default=0.3, type=click.FLOAT,
@@ -71,7 +108,6 @@ def main(min_allele_balance,
         exclude_fields,
         vcf):
     reader = VCF(vcf)
-    writer = Writer('-', reader)
     refilter = Filter(min_allele_balance,
             max_allele_balance,
             allele_balance_tag,
@@ -79,6 +115,9 @@ def main(min_allele_balance,
             min_vqslod,
             exclude_filters,
             exclude_fields)
+    reader.add_filter_to_header(refilter.filtered_header())
+    reader.add_info_to_header(refilter.rescued_header())
+    writer = Writer('-', reader)
 
     for variant in reader:
         refilter(variant) # Modifies variant filter status in place
