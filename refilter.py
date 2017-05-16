@@ -5,10 +5,11 @@ from cyvcf2 import VCF, Writer
 import numpy as np
 
 class Filter(object):
-    def __init__(self, min_allele_balance, max_allele_balance, allele_balance_tag, min_depth, min_vqslod, exclude_filters, exclude_fields):
+    def __init__(self, min_allele_balance, max_allele_balance, allele_balance_tag, depth_tag, min_depth, min_vqslod, exclude_filters, exclude_fields):
         self.allele_bounds = (min_allele_balance, max_allele_balance)
         self.allele_balance_tag = allele_balance_tag
         self.min_depth = min_depth
+        self.depth_tag = depth_tag
         self.min_vqslod = min_vqslod
         self.exclude_filters = exclude_filters
         self.exclude_fields = exclude_fields
@@ -24,7 +25,7 @@ class Filter(object):
                 }
 
     def _filter_description(self):
-        desc = 'Failed allele balance filter. {1} <= {0} <= {2} and VQSLOD >= {3} and DP >= {4}.'.format(self.allele_balance_tag, self.allele_bounds[0], self.allele_bounds[1], self.min_vqslod, self.min_depth)
+        desc = 'Failed allele balance filter. {1} <= {0} <= {2} and VQSLOD >= {3} and {5} >= {4}.'.format(self.allele_balance_tag, self.allele_bounds[0], self.allele_bounds[1], self.min_vqslod, self.min_depth, self.depth_tag)
         if self.exclude_filters is not None:
             desc += ' Ignored sites with FILTER containing: {0}.'.format(','.join(self.exclude_filters))
         if self.exclude_fields is not None:
@@ -64,7 +65,7 @@ class Filter(object):
         variant_filter = variant.FILTER
         if (ab >= self.allele_bounds[0] and
                 ab <= self.allele_bounds[1] and
-                variant.INFO['DP'] >= self.min_depth and
+                variant.INFO[self.depth_tag] >= self.min_depth and
                 variant.INFO['VQSLOD'] >= self.min_vqslod):
             if variant.FILTER is not None:
                 variant.INFO[self.rescue_tag] = variant.FILTER
@@ -89,9 +90,11 @@ class Filter(object):
 @click.option('--max-allele-balance', default=0.7, type=click.FLOAT,
         help='Maximum allele balance value to rescue a variant')
 @click.option('--allele-balance-tag', default='AB_HOM', type=click.STRING,
-        help='INFO containing the source of allele balance information')
+        help='INFO field containing the source of allele balance information')
+@click.option('--variant-sample-depth-tag', default='VAR_DP', type=click.STRING,
+        help='INFO field containing the source of depth for non-homozygous reference samples')
 @click.option('--min-depth', default=10, type=click.INT,
-        help='Minimum depth to rescue a variant')
+        help='Minimum depth of non-reference samples to rescue a variant')
 @click.option('--min-vqslod', default=None, type=click.FLOAT,
         help='Minimum VQSLOD score to allow rescue')
 @click.option('--exclude-filters', default=['MISSING'], multiple=True, type=click.STRING,
@@ -102,6 +105,7 @@ class Filter(object):
 def main(min_allele_balance,
         max_allele_balance,
         allele_balance_tag,
+        variant_sample_depth_tag,
         min_depth,
         min_vqslod,
         exclude_filters,
@@ -111,6 +115,7 @@ def main(min_allele_balance,
     refilter = Filter(min_allele_balance,
             max_allele_balance,
             allele_balance_tag,
+            variant_sample_depth_tag,
             min_depth,
             min_vqslod,
             exclude_filters,
