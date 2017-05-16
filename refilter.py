@@ -2,7 +2,6 @@
 
 import click
 from cyvcf2 import VCF, Writer
-import numpy as np
 
 class Filter(object):
     def __init__(self, min_allele_balance, max_allele_balance, allele_balance_tag, depth_tag, min_depth, min_vqslod, exclude_filters, exclude_fields):
