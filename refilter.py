@@ -62,10 +62,14 @@ class Filter(object):
     def rescue(self, variant):
         ab = variant.INFO[self.allele_balance_tag]
         variant_filter = variant.FILTER
+        try:
+            vqslod = variant.INFO['VQSLOD']
+        except KeyError:
+            vqslod = float("-inf")
         if (ab >= self.allele_bounds[0] and
                 ab <= self.allele_bounds[1] and
                 variant.INFO[self.depth_tag] >= self.min_depth and
-                variant.INFO['VQSLOD'] >= self.min_vqslod):
+                vqslod >= self.min_vqslod):
             if variant.FILTER is not None:
                 variant.INFO[self.rescue_tag] = variant.FILTER
                 self.pass_variant(variant)
