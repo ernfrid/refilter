@@ -102,7 +102,7 @@ class Filter(object):
         help='Minimum VQSLOD score to allow rescue')
 @click.option('--exclude-filters', default=['MISSING'], multiple=True, type=click.STRING,
         help='Filters that cannot be rescued')
-@click.option('--exclude-fields', default=['OLD_MULTIALLELIC'], multiple=True, type=click.STRING,
+@click.option('--exclude-fields', multiple=True, type=click.STRING,
         help='INFO fields that preclude a line from being rescued')
 @click.argument('vcf', type=click.Path())
 def main(min_allele_balance,
