@@ -25,9 +25,9 @@ class Filter(object):
 
     def _filter_description(self):
         desc = 'Failed allele balance filter. {1} <= {0} <= {2} and VQSLOD >= {3} and {5} >= {4}.'.format(self.allele_balance_tag, self.allele_bounds[0], self.allele_bounds[1], self.min_vqslod, self.min_depth, self.depth_tag)
-        if self.exclude_filters is not None:
+        if self.exclude_filters:
             desc += ' Ignored sites with FILTER containing: {0}.'.format(','.join(self.exclude_filters))
-        if self.exclude_fields is not None:
+        if self.exclude_fields:
             desc += ' Ignored sites with any of the following tags in the INFO field: {0}.'.format(','.join(self.exclude_fields))
         return desc
 
